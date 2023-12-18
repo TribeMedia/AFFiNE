@@ -2,3 +2,8 @@ export * from './app-config-storage';
 export * from './atom';
 export * from './blocksuite';
 export * from './command';
+export * from './configuration';
+export * from './di';
+export * from './eventbus';
+export * from './livedata';
+export * from './storage';

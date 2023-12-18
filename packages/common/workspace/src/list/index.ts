@@ -2,6 +2,7 @@ import { DebugLogger } from '@affine/debug';
 import type { WorkspaceFlavour } from '@affine/env/workspace';
 import { Slot } from '@blocksuite/global/utils';
 import type { Workspace as BlockSuiteWorkspace } from '@blocksuite/store';
+import type { ServiceCollection, ServiceFactory } from '@toeverything/infra';
 import { differenceWith } from 'lodash-es';
 
 import type { BlobStorage } from '../engine';
@@ -297,4 +298,19 @@ export class WorkspaceList {
   dispose() {
     this.abortController.abort();
   }
+}
+
+export function installWorkspaceList(services: ServiceCollection) {
+  services.add(WorkspaceList, p => {
+    const listProviders = p.resolveAll('workspace-list-provider').values();
+    return new WorkspaceList(Array.from(listProviders));
+  });
+}
+
+export function installWorkspaceListProvider(
+  services: ServiceCollection,
+  name: string,
+  provider: ServiceFactory<WorkspaceListProvider>
+) {
+  services.add('workspace-list-provider', provider, name);
 }
