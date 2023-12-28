@@ -10,13 +10,13 @@ export default {
 
 const _format = 'YYYY-MM-DD';
 
-export const Basic: StoryFn<typeof AFFiNEDatePicker> = props => {
+const Template: StoryFn<typeof AFFiNEDatePicker> = args => {
   const [date, setDate] = useState(dayjs().format(_format));
   return (
-    <div style={{ minHeight: 400 }}>
+    <div style={{ minHeight: 400, width: 300 }}>
       <AFFiNEDatePicker
         value={date}
-        {...props}
+        {...args}
         onChange={e => {
           setDate(dayjs(e, _format).format(_format));
         }}
@@ -25,4 +25,11 @@ export const Basic: StoryFn<typeof AFFiNEDatePicker> = props => {
   );
 };
 
+export const Basic: StoryFn<typeof AFFiNEDatePicker> = Template.bind(undefined);
 Basic.args = {};
+
+export const Inline: StoryFn<typeof AFFiNEDatePicker> =
+  Template.bind(undefined);
+Inline.args = {
+  inline: true,
+};

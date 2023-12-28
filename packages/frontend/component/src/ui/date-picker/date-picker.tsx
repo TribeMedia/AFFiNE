@@ -5,7 +5,7 @@ import {
 } from '@blocksuite/icons';
 import dayjs from 'dayjs';
 import { useCallback, useState } from 'react';
-import DatePicker from 'react-datepicker';
+import DatePicker, { type ReactDatePickerProps } from 'react-datepicker';
 
 import * as styles from './index.css';
 const months = [
@@ -22,13 +22,16 @@ const months = [
   'November',
   'December',
 ];
-type DatePickerProps = {
+interface DatePickerProps extends Omit<ReactDatePickerProps, 'onChange'> {
   value?: string;
   onChange: (value: string) => void;
-};
+}
 
-export const AFFiNEDatePicker = (props: DatePickerProps) => {
-  const { value, onChange } = props;
+export const AFFiNEDatePicker = ({
+  value,
+  onChange,
+  ...props
+}: DatePickerProps) => {
   const [openMonthPicker, setOpenMonthPicker] = useState(false);
   const [selectedDate, setSelectedDate] = useState<Date | null>(
     value ? dayjs(value).toDate() : null
@@ -184,6 +187,7 @@ export const AFFiNEDatePicker = (props: DatePickerProps) => {
               nextMonthButtonDisabled,
             })
       }
+      {...props}
     />
   );
 };
