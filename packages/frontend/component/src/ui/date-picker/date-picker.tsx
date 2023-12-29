@@ -23,7 +23,8 @@ const months = [
   'November',
   'December',
 ];
-interface DatePickerProps extends Omit<ReactDatePickerProps, 'onChange'> {
+export interface AFFiNEDatePickerProps
+  extends Omit<ReactDatePickerProps, 'onChange'> {
   value?: string;
   onChange: (value: string) => void;
 }
@@ -74,7 +75,7 @@ export const AFFiNEDatePicker = ({
   value,
   onChange,
   ...props
-}: DatePickerProps) => {
+}: AFFiNEDatePickerProps) => {
   const [openMonthPicker, setOpenMonthPicker] = useState(false);
   const [selectedDate, setSelectedDate] = useState<Date | null>(
     value ? dayjs(value).toDate() : null
