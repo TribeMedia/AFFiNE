@@ -3,8 +3,9 @@ import {
   ArrowLeftSmallIcon,
   ArrowRightSmallIcon,
 } from '@blocksuite/icons';
+import clsx from 'clsx';
 import dayjs from 'dayjs';
-import { useCallback, useState } from 'react';
+import { type HTMLAttributes, useCallback, useState } from 'react';
 import DatePicker, { type ReactDatePickerProps } from 'react-datepicker';
 
 import * as styles from './index.css';
@@ -26,6 +27,48 @@ interface DatePickerProps extends Omit<ReactDatePickerProps, 'onChange'> {
   value?: string;
   onChange: (value: string) => void;
 }
+
+interface HeaderLayoutProps extends HTMLAttributes<HTMLDivElement> {
+  length: number;
+  left: React.ReactNode;
+  right: React.ReactNode;
+}
+
+/**
+ * The `DatePicker` should work with different width
+ * This is a hack to make header's item align with calendar cell's label, **instead of the cell**
+ * @param length: number of items that calendar body row has
+ */
+const HeaderLayout = ({
+  length,
+  left,
+  right,
+  className,
+  ...attrs
+}: HeaderLayoutProps) => {
+  return (
+    <div className={clsx(styles.row, className)} {...attrs}>
+      {Array.from({ length })
+        .fill(0)
+        .map((_, index) => {
+          const isLeft = index === 0;
+          const isRight = index === length - 1;
+          return (
+            <div
+              key={index}
+              data-is-left={isLeft}
+              data-is-right={isRight}
+              className={styles.headerLayoutCell}
+            >
+              <div className={styles.headerLayoutCellOrigin}>
+                {isLeft ? left : isRight ? right : null}
+              </div>
+            </div>
+          );
+        })}
+    </div>
+  );
+};
 
 export const AFFiNEDatePicker = ({
   value,
@@ -65,43 +108,53 @@ export const AFFiNEDatePicker = ({
     const selectedYear = dayjs(date).year();
     const selectedMonth = dayjs(date).month();
     return (
-      <div className={styles.headerStyle}>
-        <div
-          data-testid="date-picker-current-month"
-          className={styles.mouthStyle}
-        >
-          {months[selectedMonth]}
-        </div>
-        <div
-          data-testid="date-picker-current-year"
-          className={styles.yearStyle}
-        >
-          {selectedYear}
-        </div>
-        <div
-          data-testid="month-picker-button"
-          className={styles.arrowDownStyle}
-          onClick={handleOpenMonthPicker}
-        >
-          <ArrowDownSmallIcon />
-        </div>
-        <button
-          data-testid="date-picker-prev-button"
-          className={styles.arrowLeftStyle}
-          onClick={decreaseMonth}
-          disabled={prevMonthButtonDisabled}
-        >
-          <ArrowLeftSmallIcon />
-        </button>
-        <button
-          data-testid="date-picker-next-button"
-          className={styles.arrowRightStyle}
-          onClick={increaseMonth}
-          disabled={nextMonthButtonDisabled}
-        >
-          <ArrowRightSmallIcon />
-        </button>
-      </div>
+      <HeaderLayout
+        length={7}
+        className={styles.headerStyle}
+        left={
+          <div className={styles.headerLabel}>
+            <div
+              data-testid="date-picker-current-month"
+              className={styles.mouthStyle}
+            >
+              {months[selectedMonth]}
+            </div>
+            <div
+              data-testid="date-picker-current-year"
+              className={styles.yearStyle}
+            >
+              {selectedYear}
+            </div>
+            <div
+              data-testid="month-picker-button"
+              className={styles.arrowDownStyle}
+              onClick={handleOpenMonthPicker}
+            >
+              <ArrowDownSmallIcon />
+            </div>
+          </div>
+        }
+        right={
+          <div className={styles.headerActionWrapper}>
+            <button
+              data-testid="date-picker-prev-button"
+              className={styles.headerAction}
+              onClick={decreaseMonth}
+              disabled={prevMonthButtonDisabled}
+            >
+              <ArrowLeftSmallIcon />
+            </button>
+            <button
+              data-testid="date-picker-next-button"
+              className={styles.headerAction}
+              onClick={increaseMonth}
+              disabled={nextMonthButtonDisabled}
+            >
+              <ArrowRightSmallIcon />
+            </button>
+          </div>
+        }
+      />
     );
   };
   const renderCustomMonthHeader = ({
@@ -119,30 +172,38 @@ export const AFFiNEDatePicker = ({
   }) => {
     const selectedYear = dayjs(date).year();
     return (
-      <div className={styles.monthHeaderStyle}>
-        <div
-          data-testid="month-picker-current-year"
-          className={styles.monthTitleStyle}
-        >
-          {selectedYear}
-        </div>
-        <button
-          data-testid="month-picker-prev-button"
-          className={styles.arrowLeftStyle}
-          onClick={decreaseYear}
-          disabled={prevYearButtonDisabled}
-        >
-          <ArrowLeftSmallIcon />
-        </button>
-        <button
-          data-testid="month-picker-next-button"
-          className={styles.arrowRightStyle}
-          onClick={increaseYear}
-          disabled={nextYearButtonDisabled}
-        >
-          <ArrowRightSmallIcon />
-        </button>
-      </div>
+      <HeaderLayout
+        length={3}
+        className={styles.monthHeaderStyle}
+        left={
+          <div
+            data-testid="month-picker-current-year"
+            className={styles.monthTitleStyle}
+          >
+            {selectedYear}
+          </div>
+        }
+        right={
+          <div className={styles.headerActionWrapper}>
+            <button
+              data-testid="month-picker-prev-button"
+              className={styles.headerAction}
+              onClick={decreaseYear}
+              disabled={prevYearButtonDisabled}
+            >
+              <ArrowLeftSmallIcon />
+            </button>
+            <button
+              data-testid="month-picker-next-button"
+              className={styles.headerAction}
+              onClick={increaseYear}
+              disabled={nextYearButtonDisabled}
+            >
+              <ArrowRightSmallIcon />
+            </button>
+          </div>
+        }
+      />
     );
   };
   return (

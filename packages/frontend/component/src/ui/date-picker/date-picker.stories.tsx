@@ -13,7 +13,9 @@ const _format = 'YYYY-MM-DD';
 const Template: StoryFn<typeof AFFiNEDatePicker> = args => {
   const [date, setDate] = useState(dayjs().format(_format));
   return (
-    <div style={{ minHeight: 400, width: 300 }}>
+    <div style={{ minHeight: 400, maxWidth: 600, margin: '0 auto' }}>
+      <div style={{ marginBottom: 20 }}>Selected Date: {date}</div>
+
       <AFFiNEDatePicker
         value={date}
         {...args}
