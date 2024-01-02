@@ -54,6 +54,7 @@ export const popperStyle = style({
   background: 'var(--affine-background-overlay-panel-color)',
   borderRadius: '12px',
   width: '300px',
+  zIndex: 'var(--affine-z-index-popover)',
 });
 
 globalStyle('.react-datepicker__header', {
