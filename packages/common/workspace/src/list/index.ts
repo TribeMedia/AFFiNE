@@ -2,7 +2,11 @@ import { DebugLogger } from '@affine/debug';
 import type { WorkspaceFlavour } from '@affine/env/workspace';
 import { Slot } from '@blocksuite/global/utils';
 import type { Workspace as BlockSuiteWorkspace } from '@blocksuite/store';
-import type { ServiceCollection, ServiceFactory } from '@toeverything/infra';
+import {
+  CacheStore,
+  type ServiceCollection,
+  type ServiceFactory,
+} from '@toeverything/infra';
 import { differenceWith } from 'lodash-es';
 
 import type { BlobStorage } from '../engine';
@@ -94,7 +98,7 @@ export class WorkspaceList {
   set status(status) {
     this._status = status;
     // update cache
-    writeWorkspaceListCache(status.workspaceList);
+    writeWorkspaceListCache(this.cache, status.workspaceList);
     this.onStatusChanged.emit(this._status);
   }
 
@@ -102,10 +106,13 @@ export class WorkspaceList {
     return this.status.workspaceList;
   }
 
-  constructor(private readonly providers: WorkspaceListProvider[]) {
+  constructor(
+    private readonly providers: WorkspaceListProvider[],
+    private readonly cache: CacheStore
+  ) {
     // initialize workspace list from cache
-    const cache = readWorkspaceListCache();
-    const workspaceList = cache;
+    const cached = readWorkspaceListCache(cache);
+    const workspaceList = cached;
     this.status = {
       ...this.status,
       workspaceList,
@@ -303,7 +310,8 @@ export class WorkspaceList {
 export function installWorkspaceList(services: ServiceCollection) {
   services.add(WorkspaceList, p => {
     const listProviders = p.resolveAll('workspace-list-provider').values();
-    return new WorkspaceList(Array.from(listProviders));
+    const cacheStore = p.resolve(CacheStore);
+    return new WorkspaceList(Array.from(listProviders), cacheStore);
   });
 }
 

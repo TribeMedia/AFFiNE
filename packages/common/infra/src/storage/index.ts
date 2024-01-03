@@ -1,7 +1,8 @@
-import type { LiveData } from '../livedata';
+import type { Observable } from 'rxjs';
 
 export abstract class Store {
-  abstract get<T>(key: string): LiveData<T | null>;
+  abstract get<T>(key: string): T | null;
+  abstract watch<T>(key: string): Observable<T | null>;
   abstract set<T>(key: string, value: T | null): void;
 }
 

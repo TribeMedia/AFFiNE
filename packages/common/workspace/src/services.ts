@@ -1,10 +1,11 @@
 import type { ServiceCollection, ServiceFactory } from '@toeverything/infra';
 
 import type { WorkspaceFactory } from './factory';
-import { WorkspaceList } from './list';
+import { installWorkspaceList, WorkspaceList } from './list';
 import { WorkspaceManager } from './manager';
 
 export function installWorkspaceManager(services: ServiceCollection) {
+  installWorkspaceList(services);
   services.add(WorkspaceManager, p => {
     const factories = p.resolveAll('workspace-factory').values();
     const list = p.resolve(WorkspaceList);

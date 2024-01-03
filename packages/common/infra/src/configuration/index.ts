@@ -1,7 +1,6 @@
-import { combineLatestAll, map, of } from 'rxjs';
+import { combineLatestAll, map, type Observable, of } from 'rxjs';
 
 import type { ServiceCollection, ServiceFactory } from '../di';
-import { LazyLiveData, type LiveData } from '../livedata';
 
 export type ConfigurationSchema = {
   onBoarding: boolean;
@@ -22,42 +21,57 @@ export class Configuration {
     this.providers = providers.sort((a, b) => a.level - b.level);
   }
 
-  get(
-    key: ConfigurationKey,
+  get<Key extends ConfigurationKey>(
+    key: Key,
     provider?: ConfigurationProviderId
-  ): LiveData<ConfigurationSchema[typeof key] | null> {
+  ): ConfigurationSchema[Key] | null {
     const providers = provider
       ? this.providers.filter(p => p.id === provider)
       : this.providers;
-    return new LazyLiveData(
-      null,
-      // get all values from providers
-      of(...providers.map(provider => provider.get(key))).pipe(
-        // combine all values to an array
-        combineLatestAll(),
-        // get last non-null value, which is the highest priority value
-        map(values => {
-          let finalValue = null;
-          for (const value of values) {
-            finalValue = value ?? finalValue;
-          }
-          return finalValue;
-        })
-      )
+    let finalValue = null;
+    for (const provider of providers) {
+      finalValue = provider.get(key) ?? finalValue;
+    }
+    return finalValue;
+  }
+
+  watch<Key extends ConfigurationKey>(
+    key: Key,
+    provider?: ConfigurationProviderId
+  ): Observable<ConfigurationSchema[Key] | null> {
+    const providers = provider
+      ? this.providers.filter(p => p.id === provider)
+      : this.providers;
+    // get all values from providers
+    return of(...providers.map(provider => provider.watch(key))).pipe(
+      // combine all values to an array
+      combineLatestAll(),
+      // get last non-null value, which is the highest priority value
+      map(values => {
+        let finalValue = null;
+        for (const value of values) {
+          finalValue = value ?? finalValue;
+        }
+        return finalValue;
+      })
     );
   }
 }
 
-export interface ConfigurationProvider {
-  id: ConfigurationProviderId;
-  level: ConfigurationLevel;
+export abstract class ConfigurationProvider {
+  abstract id: ConfigurationProviderId;
+  abstract level: ConfigurationLevel;
 
-  get<Key extends ConfigurationKey>(
-    key: ConfigurationKey
-  ): LiveData<ConfigurationSchema[Key] | null>;
+  abstract get<Key extends ConfigurationKey>(
+    key: Key
+  ): ConfigurationSchema[Key] | null;
 
-  patch<Key extends ConfigurationKey>(
-    key: ConfigurationKey,
+  abstract watch<Key extends ConfigurationKey>(
+    key: Key
+  ): Observable<ConfigurationSchema[Key] | null>;
+
+  abstract patch<Key extends ConfigurationKey>(
+    key: Key,
     value: ConfigurationSchema[Key] | null
   ): void;
 }

@@ -11,7 +11,9 @@ import {
 describe('di', () => {
   test('basic', () => {
     const serviceCollection = new ServiceCollection();
-    serviceCollection.add('test-service', { a: 'b' });
+    serviceCollection.add('test-service', () => ({
+      a: 'b',
+    }));
 
     const provider = serviceCollection.provider();
     expect(provider.resolve('test-service')).toEqual({ a: 'b' });
@@ -19,7 +21,7 @@ describe('di', () => {
 
   test('factory', () => {
     const serviceCollection = new ServiceCollection();
-    serviceCollection.addFactory('test', () => ({ a: 'b' }));
+    serviceCollection.add('test', () => ({ a: 'b' }));
 
     const provider = serviceCollection.provider();
     expect(provider.resolve('test')).toEqual({ a: 'b' });
@@ -32,7 +34,7 @@ describe('di', () => {
 
     {
       const serviceCollection = new ServiceCollection();
-      serviceCollection.add(TestClass, new TestClass('bar'));
+      serviceCollection.add(TestClass, () => new TestClass('bar'));
 
       const provider = serviceCollection.provider();
       expect(provider.resolve(TestClass).foo).toEqual('bar');
@@ -40,7 +42,7 @@ describe('di', () => {
 
     {
       const serviceCollection = new ServiceCollection();
-      serviceCollection.addFactory(TestClass, () => new TestClass('bar'));
+      serviceCollection.add(TestClass, () => new TestClass('bar'));
 
       const provider = serviceCollection.provider();
       expect(provider.resolve(TestClass).foo).toEqual('bar');
@@ -51,21 +53,21 @@ describe('di', () => {
     const serviceCollection = new ServiceCollection();
 
     // a depends on b
-    serviceCollection.addFactory('serviceA', provider => ({
+    serviceCollection.add('serviceA', provider => ({
       b: provider.resolve('serviceB'),
     }));
 
     // b depends on c
-    serviceCollection.addFactory('serviceB', provider => ({
+    serviceCollection.add('serviceB', provider => ({
       c: provider.resolve('serviceC'),
     }));
 
-    serviceCollection.add('serviceC', {
+    serviceCollection.add('serviceC', () => ({
       final: 'i am c',
-    });
+    }));
 
     const provider = serviceCollection.provider();
-    expect(provider.resolve('serviceA').b.c.final).toEqual('i am c');
+    expect(provider.resolve<any>('serviceA').b.c.final).toEqual('i am c');
   });
 
   test('service not found', () => {
@@ -81,7 +83,7 @@ describe('di', () => {
     const serviceCollection = new ServiceCollection();
 
     // a depends on b
-    serviceCollection.addFactory('serviceA', provider => ({
+    serviceCollection.add('serviceA', provider => ({
       b: provider.resolve('serviceB'),
     }));
 
@@ -95,17 +97,17 @@ describe('di', () => {
     const serviceCollection = new ServiceCollection();
 
     // a depends on b
-    serviceCollection.addFactory('serviceA', provider => ({
+    serviceCollection.add('serviceA', provider => ({
       b: provider.resolve('serviceB'),
     }));
 
     // b depends on c
-    serviceCollection.addFactory('serviceB', provider => ({
+    serviceCollection.add('serviceB', provider => ({
       c: provider.resolve('serviceC'),
     }));
 
     // c depends on a
-    serviceCollection.addFactory('serviceC', provider => ({
+    serviceCollection.add('serviceC', provider => ({
       a: provider.resolve('serviceA'),
     }));
 
@@ -127,13 +129,13 @@ describe('di', () => {
     let i = 0;
     for (; i < 100; i++) {
       const next = i + 1;
-      serviceCollection.addFactory(
+      serviceCollection.add(
         'test',
         provider => provider.resolve('test', next.toString()),
         i.toString()
       );
     }
-    serviceCollection.add('test', { a: 'b' }, i.toString());
+    serviceCollection.add('test', () => ({ a: 'b' }), i.toString());
     const provider = serviceCollection.provider();
     expect(() => provider.resolve('test', '0')).toThrowError(
       RecursionLimitError
@@ -142,8 +144,8 @@ describe('di', () => {
 
   test('variant', () => {
     const serviceCollection = new ServiceCollection();
-    serviceCollection.add('test-service', { a: 'i am A' }, 'typeA');
-    serviceCollection.add('test-service', { b: 'i am B' }, 'typeB');
+    serviceCollection.add('test-service', () => ({ a: 'i am A' }), 'typeA');
+    serviceCollection.add('test-service', () => ({ b: 'i am B' }), 'typeB');
 
     const provider = serviceCollection.provider();
     expect(provider.resolve('test-service', 'typeA')).toEqual({ a: 'i am A' });
@@ -152,8 +154,8 @@ describe('di', () => {
 
   test('duplicate, override', () => {
     const serviceCollection = new ServiceCollection();
-    serviceCollection.add('test-service', { a: 'i am A' });
-    serviceCollection.add('test-service', { b: 'i am B' });
+    serviceCollection.add('test-service', () => ({ a: 'i am A' }));
+    serviceCollection.add('test-service', () => ({ b: 'i am B' }));
 
     const provider = serviceCollection.provider();
     expect(provider.resolve('test-service')).toEqual({ b: 'i am B' });

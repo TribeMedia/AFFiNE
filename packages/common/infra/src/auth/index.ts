@@ -1,5 +1,6 @@
 import { combineLatestAll, map, of } from 'rxjs';
 
+import type { ServiceCollection, ServiceFactory } from '../di';
 import type { LiveData } from '../livedata';
 import { LazyLiveData } from '../livedata';
 
@@ -22,16 +23,16 @@ export class AuthenticationManager {
   );
 }
 
-export interface AuthenticationProvider {
+export abstract class AuthenticationProvider {
   /**
    * provider unique id
    */
-  id: string;
+  abstract id: string;
 
   /**
    * current authentication session
    */
-  session: LiveData<
+  abstract session: LiveData<
     | { status: 'unauthenticated' }
     | { status: 'loading' }
     | { status: 'authenticated'; session: AuthenticationSession }
@@ -47,4 +48,22 @@ export interface AuthenticationAccountInformation {
   id: string;
   label: string;
   avatar?: string | null;
+}
+
+export function installAuthenticationManager(services: ServiceCollection) {
+  services.add(
+    AuthenticationManager,
+    p =>
+      new AuthenticationManager(
+        Array.from(p.resolveAll(AuthenticationProvider).values())
+      )
+  );
+}
+
+export function installAuthenticationProvider(
+  services: ServiceCollection,
+  name: string,
+  provider: ServiceFactory<AuthenticationProvider>
+) {
+  services.add(AuthenticationProvider, provider, name);
 }

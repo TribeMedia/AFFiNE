@@ -1,6 +1,5 @@
 import { DEFAULT_SERVICE_VARIANT } from './consts';
-import { createServiceProvider } from './provider';
-import { RawServiceProviderImpl } from './raw-provider';
+import { BasicServiceProvider } from './provider';
 import type {
   ServiceFactory,
   ServiceProvider,
@@ -10,6 +9,10 @@ import type {
 
 export class ServiceCollection {
   services: Map<ServiceType, Map<ServiceVariant, ServiceFactory>> = new Map();
+
+  static get EMPTY() {
+    return new ServiceCollection();
+  }
 
   add(
     type: ServiceType,
@@ -22,6 +25,6 @@ export class ServiceCollection {
   }
 
   provider(): ServiceProvider {
-    return createServiceProvider(new RawServiceProviderImpl(this));
+    return new BasicServiceProvider(this);
   }
 }

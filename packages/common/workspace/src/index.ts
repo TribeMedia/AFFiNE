@@ -4,4 +4,5 @@ export * from './global-schema';
 export * from './list';
 export * from './manager';
 export * from './metadata';
+export * from './services';
 export * from './workspace';

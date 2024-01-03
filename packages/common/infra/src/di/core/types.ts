@@ -2,17 +2,17 @@ export type ServiceFactory<T = any> = (provider: ServiceProvider) => T;
 export type ServiceVariant = string | symbol;
 export type ServiceType = any;
 
-export interface RawServiceProvider {
-  resolveRaw(type: ServiceType, variant?: ServiceVariant): any;
-  resolveAllRaw(type: ServiceType): Map<ServiceVariant, any>;
-}
+export abstract class ServiceProvider {
+  abstract resolveRaw(type: ServiceType, variant?: ServiceVariant): any;
+  abstract resolveAllRaw(type: ServiceType): Map<ServiceVariant, any>;
 
-export interface ServiceProvider extends RawServiceProvider {
-  resolve<T = any>(
-    type: Type<T> | string | symbol,
-    variant?: ServiceVariant
-  ): T;
-  resolveAll<T = any>(type: Type<T> | string | symbol): Map<ServiceVariant, T>;
+  resolve<T>(type: string | symbol | Type<T>, variant?: ServiceVariant): T {
+    return this.resolveRaw(type, variant);
+  }
+
+  resolveAll<T = any>(type: string | symbol | Type<T>): Map<ServiceVariant, T> {
+    return this.resolveAllRaw(type);
+  }
 }
 
 // eslint-disable-next-line @typescript-eslint/ban-types

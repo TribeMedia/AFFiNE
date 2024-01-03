@@ -1,7 +1,7 @@
 import { map, of } from 'rxjs';
 import { describe, expect, test } from 'vitest';
 
-import { LazyLiveData, LiveData } from '..';
+import { LiveData } from '..';
 
 describe('livedata', () => {
   test('LiveData', async () => {
@@ -28,10 +28,5 @@ describe('livedata', () => {
       livedata1.next(2);
       expect(livedata2.value).toBe('live2');
     }
-  });
-
-  test('LazyLiveData', async () => {
-    const lazy = new LazyLiveData(0, of(1, 2, 3, 4));
-    expect(lazy.value).toBe(4);
   });
 });

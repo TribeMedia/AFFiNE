@@ -1,12 +1,14 @@
+import type { CacheStore } from '@toeverything/infra';
+
 import { type WorkspaceMetadata } from '../metadata';
 
 const CACHE_STORAGE_KEY = 'jotai-workspaces';
 
-export function readWorkspaceListCache() {
-  const metadata = localStorage.getItem(CACHE_STORAGE_KEY);
+export function readWorkspaceListCache(cache: CacheStore) {
+  const metadata = cache.get(CACHE_STORAGE_KEY).value;
   if (metadata) {
     try {
-      const items = JSON.parse(metadata) as WorkspaceMetadata[];
+      const items = metadata as WorkspaceMetadata[];
       return [...items];
     } catch (e) {
       console.error('cannot parse worksapce', e);
@@ -16,6 +18,9 @@ export function readWorkspaceListCache() {
   return [];
 }
 
-export function writeWorkspaceListCache(metadata: WorkspaceMetadata[]) {
-  localStorage.setItem(CACHE_STORAGE_KEY, JSON.stringify(metadata));
+export function writeWorkspaceListCache(
+  cache: CacheStore,
+  metadata: WorkspaceMetadata[]
+) {
+  cache.set(CACHE_STORAGE_KEY, metadata);
 }

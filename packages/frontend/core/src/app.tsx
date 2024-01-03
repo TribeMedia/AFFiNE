@@ -14,8 +14,10 @@ import { RouterProvider } from 'react-router-dom';
 
 import { CloudSessionProvider } from './providers/session-provider';
 import { router } from './router';
+import { ServiceProvider } from './services';
 import { performanceLogger, performanceRenderLogger } from './shared';
 import createEmotionCache from './utils/create-emotion-cache';
+import { createWebServices } from './web';
 
 const performanceI18nLogger = performanceLogger.namespace('i18n');
 const cache = createEmotionCache();
@@ -52,6 +54,9 @@ async function loadLanguage() {
 
 let languageLoadingPromise: Promise<void> | null = null;
 
+const services = createWebServices();
+const serviceProvider = services.provider();
+
 export const App = memo(function App() {
   performanceRenderLogger.info('App');
 
@@ -60,20 +65,22 @@ export const App = memo(function App() {
   }
 
   return (
-    <CacheProvider value={cache}>
-      <AffineContext store={getCurrentStore()}>
-        <CloudSessionProvider>
-          <DebugProvider>
-            <GlobalLoading />
-            {runtimeConfig.enableNotificationCenter && <NotificationCenter />}
-            <RouterProvider
-              fallbackElement={<WorkspaceFallback key="RouterFallback" />}
-              router={router}
-              future={future}
-            />
-          </DebugProvider>
-        </CloudSessionProvider>
-      </AffineContext>
-    </CacheProvider>
+    <ServiceProvider value={serviceProvider}>
+      <CacheProvider value={cache}>
+        <AffineContext store={getCurrentStore()}>
+          <CloudSessionProvider>
+            <DebugProvider>
+              <GlobalLoading />
+              {runtimeConfig.enableNotificationCenter && <NotificationCenter />}
+              <RouterProvider
+                fallbackElement={<WorkspaceFallback key="RouterFallback" />}
+                router={router}
+                future={future}
+              />
+            </DebugProvider>
+          </CloudSessionProvider>
+        </AffineContext>
+      </CacheProvider>
+    </ServiceProvider>
   );
 });
