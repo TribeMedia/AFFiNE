@@ -26,6 +26,7 @@ import type { FileUpload } from '../../../types';
 import { Auth, CurrentUser, Public } from '../../auth';
 import { MailService } from '../../auth/mailer';
 import { AuthService } from '../../auth/service';
+import { FeatureManagementService, FeatureType } from '../../features';
 import { QuotaManagementService } from '../../quota';
 import { WorkspaceBlobStorage } from '../../storage';
 import { UsersService, UserType } from '../../users';
@@ -55,6 +56,7 @@ export class WorkspaceResolver {
     private readonly mailer: MailService,
     private readonly prisma: PrismaService,
     private readonly permissions: PermissionService,
+    private readonly feature: FeatureManagementService,
     private readonly quota: QuotaManagementService,
     private readonly users: UsersService,
     private readonly event: EventEmitter,
@@ -323,15 +325,21 @@ export class WorkspaceResolver {
       throw new ForbiddenException('Cannot change owner');
     }
 
-    // member limit check
-    const [memberCount, quota] = await Promise.all([
-      this.prisma.workspaceUserPermission.count({
-        where: { workspaceId },
-      }),
-      this.quota.getUserQuota(user.id),
-    ]);
-    if (memberCount >= quota.memberLimit) {
-      throw new ForbiddenException('Workspace member limit reached');
+    const unlimited = await this.feature.hasWorkspaceFeature(
+      workspaceId,
+      FeatureType.UnlimitedWorkspace
+    );
+    if (!unlimited) {
+      // member limit check
+      const [memberCount, quota] = await Promise.all([
+        this.prisma.workspaceUserPermission.count({
+          where: { workspaceId },
+        }),
+        this.quota.getUserQuota(user.id),
+      ]);
+      if (memberCount >= quota.memberLimit) {
+        throw new ForbiddenException('Workspace member limit reached');
+      }
     }
 
     let target = await this.users.findUserByEmail(email);
