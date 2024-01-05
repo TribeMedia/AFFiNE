@@ -26,6 +26,7 @@ import type { FileUpload } from '../../../types';
 import { Auth, CurrentUser, Public } from '../../auth';
 import { MailService } from '../../auth/mailer';
 import { AuthService } from '../../auth/service';
+import { QuotaManagementService } from '../../quota';
 import { WorkspaceBlobStorage } from '../../storage';
 import { UsersService, UserType } from '../../users';
 import { PermissionService } from '../permission';
@@ -54,6 +55,7 @@ export class WorkspaceResolver {
     private readonly mailer: MailService,
     private readonly prisma: PrismaService,
     private readonly permissions: PermissionService,
+    private readonly quota: QuotaManagementService,
     private readonly users: UsersService,
     private readonly event: EventEmitter,
     private readonly blobStorage: WorkspaceBlobStorage
@@ -321,8 +323,18 @@ export class WorkspaceResolver {
       throw new ForbiddenException('Cannot change owner');
     }
 
-    const target = await this.users.findUserByEmail(email);
+    // member limit check
+    const [memberCount, quota] = await Promise.all([
+      this.prisma.workspaceUserPermission.count({
+        where: { workspaceId },
+      }),
+      this.quota.getUserQuota(workspaceId),
+    ]);
+    if (memberCount >= quota.memberLimit) {
+      throw new ForbiddenException('Workspace member limit reached');
+    }
 
+    let target = await this.users.findUserByEmail(email);
     if (target) {
       const originRecord = await this.prisma.workspaceUserPermission.findFirst({
         where: {
@@ -330,94 +342,52 @@ export class WorkspaceResolver {
           userId: target.id,
         },
       });
-
-      if (originRecord) {
-        return originRecord.id;
-      }
-
-      const inviteId = await this.permissions.grant(
-        workspaceId,
-        target.id,
-        permission
-      );
-      if (sendInviteMail) {
-        const inviteInfo = await this.getInviteInfo(inviteId);
-
-        try {
-          await this.mailer.sendInviteEmail(email, inviteId, {
-            workspace: {
-              id: inviteInfo.workspace.id,
-              name: inviteInfo.workspace.name,
-              avatar: inviteInfo.workspace.avatar,
-            },
-            user: {
-              avatar: inviteInfo.user?.avatarUrl || '',
-              name: inviteInfo.user?.name || '',
-            },
-          });
-        } catch (e) {
-          const ret = await this.permissions.revokeWorkspace(
-            workspaceId,
-            target.id
-          );
-
-          if (!ret) {
-            this.logger.fatal(
-              `failed to send ${workspaceId} invite email to ${email} and failed to revoke permission: ${inviteId}, ${e}`
-            );
-          } else {
-            this.logger.warn(
-              `failed to send ${workspaceId} invite email to ${email}, but successfully revoked permission: ${e}`
-            );
-          }
-
-          return new InternalServerErrorException(e);
-        }
-      }
-      return inviteId;
+      // only invite if the user is not already in the workspace
+      if (originRecord) return originRecord.id;
     } else {
-      const user = await this.auth.createAnonymousUser(email);
-      const inviteId = await this.permissions.grant(
-        workspaceId,
-        user.id,
-        permission
-      );
-      if (sendInviteMail) {
-        const inviteInfo = await this.getInviteInfo(inviteId);
-
-        try {
-          await this.mailer.sendInviteEmail(email, inviteId, {
-            workspace: {
-              id: inviteInfo.workspace.id,
-              name: inviteInfo.workspace.name,
-              avatar: inviteInfo.workspace.avatar,
-            },
-            user: {
-              avatar: inviteInfo.user?.avatarUrl || '',
-              name: inviteInfo.user?.name || '',
-            },
-          });
-        } catch (e) {
-          const ret = await this.permissions.revokeWorkspace(
-            workspaceId,
-            user.id
-          );
-
-          if (!ret) {
-            this.logger.fatal(
-              `failed to send ${workspaceId} invite email to ${email} and failed to revoke permission: ${inviteId}, ${e}`
-            );
-          } else {
-            this.logger.warn(
-              `failed to send ${workspaceId} invite email to ${email}, but successfully revoked permission: ${e}`
-            );
-          }
-
-          return new InternalServerErrorException(e);
-        }
-      }
-      return inviteId;
+      target = await this.auth.createAnonymousUser(email);
     }
+
+    const inviteId = await this.permissions.grant(
+      workspaceId,
+      target.id,
+      permission
+    );
+    if (sendInviteMail) {
+      const inviteInfo = await this.getInviteInfo(inviteId);
+
+      try {
+        await this.mailer.sendInviteEmail(email, inviteId, {
+          workspace: {
+            id: inviteInfo.workspace.id,
+            name: inviteInfo.workspace.name,
+            avatar: inviteInfo.workspace.avatar,
+          },
+          user: {
+            avatar: inviteInfo.user?.avatarUrl || '',
+            name: inviteInfo.user?.name || '',
+          },
+        });
+      } catch (e) {
+        const ret = await this.permissions.revokeWorkspace(
+          workspaceId,
+          target.id
+        );
+
+        if (!ret) {
+          this.logger.fatal(
+            `failed to send ${workspaceId} invite email to ${email} and failed to revoke permission: ${inviteId}, ${e}`
+          );
+        } else {
+          this.logger.warn(
+            `failed to send ${workspaceId} invite email to ${email}, but successfully revoked permission: ${e}`
+          );
+        }
+
+        return new InternalServerErrorException(e);
+      }
+    }
+    return inviteId;
   }
 
   @Throttle({
