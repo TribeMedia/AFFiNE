@@ -107,16 +107,19 @@ export class WorkspaceBlobResolver {
       Permission.Write
     );
 
-    const { quota, size } = await this.quota.getWorkspaceUsage(workspaceId);
+    const { quota, size, limit } =
+      await this.quota.getWorkspaceUsage(workspaceId);
 
     const checkExceeded = (recvSize: number) => {
       if (!quota) {
         throw new ForbiddenException('cannot find user quota');
       }
-      if (size + recvSize > quota) {
-        this.logger.log(
-          `storage size limit exceeded: ${size + recvSize} > ${quota}`
-        );
+      const total = size + recvSize;
+      if (total > quota) {
+        this.logger.log(`storage size limit exceeded: ${total} > ${quota}`);
+        return true;
+      } else if (recvSize > limit) {
+        this.logger.log(`blob size limit exceeded: ${recvSize} > ${limit}`);
         return true;
       } else {
         return false;
@@ -124,7 +127,7 @@ export class WorkspaceBlobResolver {
     };
 
     if (checkExceeded(0)) {
-      throw new ForbiddenException('storage size limit exceeded');
+      throw new ForbiddenException('storage or blob size limit exceeded');
     }
     const buffer = await new Promise<Buffer>((resolve, reject) => {
       const stream = blob.createReadStream();
@@ -135,7 +138,7 @@ export class WorkspaceBlobResolver {
         // check size after receive each chunk to avoid unnecessary memory usage
         const bufferSize = chunks.reduce((acc, cur) => acc + cur.length, 0);
         if (checkExceeded(bufferSize)) {
-          reject(new ForbiddenException('storage size limit exceeded'));
+          reject(new ForbiddenException('storage or blob size limit exceeded'));
         }
       });
       stream.on('error', reject);
