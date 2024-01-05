@@ -2,13 +2,14 @@ import { Test, TestingModule } from '@nestjs/testing';
 import test from 'ava';
 
 import { Cache, CacheModule } from '../src/cache';
+import { RedisModule } from '../src/cache/redis';
 import { ConfigModule } from '../src/config';
 
 let cache: Cache;
 let module: TestingModule;
 test.beforeEach(async () => {
   module = await Test.createTestingModule({
-    imports: [ConfigModule.forRoot(), CacheModule],
+    imports: [ConfigModule.forRoot(), RedisModule, CacheModule],
   }).compile();
   const prefix = Math.random().toString(36).slice(2, 7);
   cache = new Proxy(module.get(Cache), {

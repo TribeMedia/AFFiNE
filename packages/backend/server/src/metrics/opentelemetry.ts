@@ -128,17 +128,8 @@ function createSDK() {
   return factor?.create();
 }
 
-let OPENTELEMETRY_STARTED = false;
-
-function ensureStarted() {
-  if (!OPENTELEMETRY_STARTED) {
-    OPENTELEMETRY_STARTED = true;
-    start();
-  }
-}
-
 function getMeterProvider() {
-  ensureStarted();
+  start();
   return metrics.getMeterProvider();
 }
 
@@ -154,11 +145,18 @@ export function getMeter(name = 'business') {
   return getMeterProvider().getMeter(name);
 }
 
-export function start() {
-  const sdk = createSDK();
+let sdk: NodeSDK | null = null;
 
-  if (sdk) {
+export function start() {
+  if (!sdk && !AFFiNE.node.test) {
+    sdk = createSDK();
     sdk.start();
     registerCustomMetrics();
+  }
+}
+
+export async function stop() {
+  if (sdk) {
+    await sdk.shutdown();
   }
 }
