@@ -112,6 +112,26 @@ export const InlineEdit = ({
     [onInput]
   );
 
+  // to make sure input's style is the same as displayed text
+  const inputWrapperInheritsStyles = {
+    margin: 'inherit',
+    padding: 'inherit',
+    borderRadius: 'inherit',
+    fontSize: 'inherit',
+    fontFamily: 'inherit',
+    lineHeight: 'inherit',
+    fontWeight: 'inherit',
+    letterSpacing: 'inherit',
+    textAlign: 'inherit',
+    color: 'inherit',
+    backgroundColor: 'inherit',
+  } as CSSProperties;
+  const inputInheritsStyles = {
+    ...inputWrapperInheritsStyles,
+    padding: undefined,
+    margin: undefined,
+  };
+
   return (
     <div
       data-editing={editing}
@@ -146,6 +166,8 @@ export const InlineEdit = ({
           onBlur={onBlur}
           onEnter={onEnter}
           onChange={inputHandler}
+          style={inputWrapperInheritsStyles}
+          inputStyle={inputInheritsStyles}
         />
       }
     </div>

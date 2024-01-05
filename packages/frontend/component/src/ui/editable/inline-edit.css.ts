@@ -33,18 +33,6 @@ export const inlineEditInput = style({
   left: 0,
   top: 0,
 
-  margin: 'inherit',
-  padding: 'inherit',
-  borderRadius: 'inherit',
-  fontSize: 'inherit',
-  fontFamily: 'inherit',
-  lineHeight: 'inherit',
-  fontWeight: 'inherit',
-  letterSpacing: 'inherit',
-  textAlign: 'inherit',
-  color: 'inherit',
-  backgroundColor: 'inherit',
-
   opacity: 0,
   visibility: 'hidden',
   pointerEvents: 'none',

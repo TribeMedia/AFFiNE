@@ -57,3 +57,16 @@ Basic.args = {
   trigger: 'doubleClick',
   autoSelect: true,
 };
+
+export const CustomizeText: StoryFn<typeof InlineEdit> =
+  Template.bind(undefined);
+CustomizeText.args = {
+  value: 'Customize Text',
+  editable: true,
+  placeholder: 'Untitled',
+  style: {
+    fontSize: 20,
+    fontWeight: 500,
+    padding: '10px 20px',
+  },
+};
