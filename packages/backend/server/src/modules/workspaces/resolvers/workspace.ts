@@ -328,7 +328,7 @@ export class WorkspaceResolver {
       this.prisma.workspaceUserPermission.count({
         where: { workspaceId },
       }),
-      this.quota.getUserQuota(workspaceId),
+      this.quota.getUserQuota(user.id),
     ]);
     if (memberCount >= quota.memberLimit) {
       throw new ForbiddenException('Workspace member limit reached');
