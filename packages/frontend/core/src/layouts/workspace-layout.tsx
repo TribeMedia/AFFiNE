@@ -2,6 +2,7 @@ import {
   AppSidebarFallback,
   appSidebarResizingAtom,
 } from '@affine/component/app-sidebar';
+import { pushNotificationAtom } from '@affine/component/notification-center';
 import {
   type DraggableTitleCellData,
   PageListDragOverlay,
@@ -152,11 +153,31 @@ export const WorkspaceLayoutInner = ({ children }: PropsWithChildren) => {
   const { appSettings } = useAppSettingHelper();
   const location = useLocation();
   const { pageId } = useParams();
+  const pushNotification = useSetAtom(pushNotificationAtom);
 
   // todo: refactor this that the root layout do not need to check route state
   const isInPageDetail = !!pageId;
 
   const upgradeStatus = useWorkspaceStatus(currentWorkspace, s => s.upgrade);
+  const blobCapacityStatus = useWorkspaceStatus(
+    currentWorkspace,
+    s => s.engine.blob
+  );
+
+  useEffect(() => {
+    // to check if the workspace blob is over capacity
+    if (blobCapacityStatus === 'idle') {
+      return;
+    }
+    if (blobCapacityStatus === 'over-capacity') {
+      pushNotification({
+        title: 'Over capacity',
+        message: 'Please upgrade your workspace',
+        key: 'over-capacity',
+        type: 'error',
+      });
+    }
+  }, [pushNotification, blobCapacityStatus]);
 
   return (
     <>
