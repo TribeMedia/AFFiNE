@@ -1,0 +1,5 @@
+CREATE USER affine WITH PASSWORD 'affine';
+
+
+ALTER USER affine WITH SUPERUSER;
+CREATE DATABASE affine;
