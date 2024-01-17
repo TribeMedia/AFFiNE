@@ -1,15 +1,15 @@
 name: affine
 version: '3.8'
 services:
-  #affine:
-  #  image: tribehealth/affine:v0.0.1
-  #  restart: unless-stopped
-  #  ports:
-  #    - ${AFFINE_PORT}:8080
-  #    - ${AFFINE_WEB_PORT}:3010
-  #  environment:
-  #    DATABASE_URL: ${DATABASE_URL}
-  #    NEXTAUTH_URL: ${NEXTAUTH_URL}
+  affine:
+    image: tribehealth/affine:v0.0.1
+    restart: unless-stopped
+    ports:
+      - ${AFFINE_PORT}:8080
+      - ${AFFINE_WEB_PORT}:3010
+    environment:
+      DATABASE_URL: ${DATABASE_URL}
+      NEXTAUTH_URL: ${NEXTAUTH_URL}
 
   studio:
     container_name: affine-supabase-studio
