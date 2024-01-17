@@ -1,6 +1,16 @@
 name: affine
 version: '3.8'
 services:
+  #affine:
+  #  image: tribehealth/affine:v0.0.1
+  #  restart: unless-stopped
+  #  ports:
+  #    - ${AFFINE_PORT}:8080
+  #    - ${AFFINE_WEB_PORT}:3010
+  #  environment:
+  #    DATABASE_URL: ${DATABASE_URL}
+  #    NEXTAUTH_URL: ${NEXTAUTH_URL}
+
   studio:
     container_name: affine-supabase-studio
     image: supabase/studio:20240101-8e4a094
@@ -321,7 +331,7 @@ services:
   #    - 4022:4000
   db:
     container_name: affine-supabase-db
-    image: supabase/postgres:15.1.1.2
+    image: tribehealth/supabase-db:buildx-0.0.21
     healthcheck:
       test: pg_isready -U postgres -h localhost
       interval: 5s
