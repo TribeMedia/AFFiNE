@@ -333,7 +333,7 @@ services:
   #    - 4022:4000
   db:
     container_name: affine-supabase-db
-    image: tribehealth/supabase-db:buildx-0.0.21
+    image: tribehealth/affine-supabase-db:v0.1.1
     healthcheck:
       test: pg_isready -U postgres -h localhost
       interval: 5s
