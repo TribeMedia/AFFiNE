@@ -451,8 +451,6 @@ CREATE TABLE public.content_type (
 ALTER TABLE public.content_type OWNER TO postgres;
 
 
-ALTER TABLE public.ethos_invitation OWNER TO postgres;
-
 --
 -- Name: extensions; Type: TABLE; Schema: public; Owner: postgres
 --
