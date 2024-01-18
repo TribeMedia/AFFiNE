@@ -8,8 +8,8 @@ services:
         condition: service_healthy
     restart: unless-stopped
     ports:
-      - ${AFFINE_PORT}:8080
-      - ${AFFINE_WEB_PORT}:3010
+      - ${AFFINE_PORT}:8080/tcp
+      - ${AFFINE_WEB_PORT}:3010/tcp
     environment:
       DATABASE_URL: ${DATABASE_URL}
       NEXTAUTH_URL: ${NEXTAUTH_URL}
