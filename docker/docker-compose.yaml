@@ -79,7 +79,7 @@ services:
       DASHBOARD_PASSWORD: ${DASHBOARD_PASSWORD}
     volumes:
       # https://github.com/supabase/supabase/issues/12661
-      - ./volumes/api/kong.yml:/home/kong/temp.yml:ro
+      - ./kong/kong.yml:/home/kong/temp.yml:ro
 
   auth:
     container_name: affine-supabase-auth
@@ -139,8 +139,7 @@ services:
 
       GOTRUE_EXTERNAL_PHONE_ENABLED: ${ENABLE_PHONE_SIGNUP}
       GOTRUE_SMS_AUTOCONFIRM: ${ENABLE_PHONE_AUTOCONFIRM}
-    # volumes:
-    #  - ./db/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
+
   rest:
     container_name: affine-supabase-rest
     image: postgrest/postgrest:v12.0.1
@@ -288,7 +287,7 @@ services:
       # TODO: Allow configuring VERIFY_JWT per function. This PR might help: https://github.com/supabase/cli/pull/786
       VERIFY_JWT: '${FUNCTIONS_VERIFY_JWT}'
     volumes:
-      - ./volumes/functions:/home/deno/functions:Z
+      - ./functions:/home/deno/functions:Z
     command:
       - start
       - --main-service
