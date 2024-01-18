@@ -3,6 +3,9 @@ version: '3.8'
 services:
   affine:
     image: tribehealth/affine:v0.0.1
+    depends_on:
+      db:
+        condition: service_healthy
     restart: unless-stopped
     ports:
       - ${AFFINE_PORT}:8080
@@ -333,7 +336,7 @@ services:
   #    - 4022:4000
   db:
     container_name: affine-supabase-db
-    image: tribehealth/affine-supabase-db:v0.1.1
+    image: tribehealth/affine-supabase-db:v0.1.3
     healthcheck:
       test: pg_isready -U postgres -h localhost
       interval: 5s

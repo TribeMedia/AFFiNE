@@ -16,10 +16,11 @@ SET xmloption = content;
 SET client_min_messages = warning;
 SET row_security = off;
 
-\set pw :'POSTGRES_PASSWORD'
-ALTER USER supabase_admin WITH PASSWORD :'pw';
-ALTER USER authenticator WITH PASSWORD :'pw';
-ALTER USER supabase_storage WITH PASSWORD :'pw';
+CREATE EXTENSION IF NOT EXISTS pg_net WITH SCHEMA extensions;
+CREATE EXTENSION IF NOT EXISTS http WITH SCHEMA extensions;
+
+ALTER USER supabase_admin WITH PASSWORD 'postgres';
+ALTER USER authenticator WITH PASSWORD 'postgres';
 
 DROP POLICY IF EXISTS "Enable read access for all users" ON public.user_type;
 DROP POLICY IF EXISTS "Enable read access for all users" ON public.user_role;
