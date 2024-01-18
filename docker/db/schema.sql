@@ -22,7 +22,6 @@ CREATE EXTENSION IF NOT EXISTS http WITH SCHEMA extensions;
 ALTER USER supabase_admin WITH PASSWORD 'postgres';
 ALTER USER authenticator WITH PASSWORD 'postgres';
 
-DROP POLICY IF EXISTS "Enable read access for all users" ON public.user_type;
 DROP POLICY IF EXISTS "Enable read access for all users" ON public.user_role;
 DROP POLICY IF EXISTS "Enable read access for all users" ON public."user";
 DROP POLICY IF EXISTS "Enable read access for all users" ON public.role;
@@ -56,9 +55,6 @@ ALTER TABLE IF EXISTS ONLY public.asset DROP CONSTRAINT IF EXISTS asset_updater_
 ALTER TABLE IF EXISTS ONLY public.asset DROP CONSTRAINT IF EXISTS asset_owner_user_id_fkey;
 ALTER TABLE IF EXISTS ONLY public.asset DROP CONSTRAINT IF EXISTS asset_creator_id_fkey;
 ALTER TABLE IF EXISTS ONLY public.asset DROP CONSTRAINT IF EXISTS asset_asset_type_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.user_type DROP CONSTRAINT IF EXISTS user_type_pkey;
-ALTER TABLE IF EXISTS ONLY public.user_type DROP CONSTRAINT IF EXISTS user_type_name_key;
-ALTER TABLE IF EXISTS ONLY public.user_type DROP CONSTRAINT IF EXISTS user_type_key_key;
 ALTER TABLE IF EXISTS ONLY public.user_role DROP CONSTRAINT IF EXISTS user_role_pkey;
 ALTER TABLE IF EXISTS ONLY public."user" DROP CONSTRAINT IF EXISTS user_pkey;
 ALTER TABLE IF EXISTS ONLY public."user" DROP CONSTRAINT IF EXISTS user_identifier_key;
@@ -588,12 +584,6 @@ INSERT INTO public.content_type (id, name, key, schema, created_at, mime_type) V
 
 
 --
--- Data for Name: ethos_invitation; Type: TABLE DATA; Schema: public; Owner: postgres
---
-
-
-
---
 -- Data for Name: extensions; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
@@ -1029,14 +1019,6 @@ ALTER TABLE ONLY public.user_role
 
 
 --
--- Name: user user_user_type_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
---
-
-ALTER TABLE ONLY public."user"
-    ADD CONSTRAINT user_user_type_id_fkey FOREIGN KEY (user_type_id) REFERENCES public.user_type(id) ON UPDATE CASCADE ON DELETE CASCADE;
-
-
---
 -- Name: asset Enable read access for all users; Type: POLICY; Schema: public; Owner: postgres
 --
 
@@ -1104,14 +1086,6 @@ CREATE POLICY "Enable read access for all users" ON public."user" USING (true);
 --
 
 CREATE POLICY "Enable read access for all users" ON public.user_role USING (true);
-
-
---
--- Name: user_type Enable read access for all users; Type: POLICY; Schema: public; Owner: postgres
---
-
-CREATE POLICY "Enable read access for all users" ON public.user_type USING (true);
-
 
 --
 -- Name: asset; Type: ROW SECURITY; Schema: public; Owner: postgres
