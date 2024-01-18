@@ -60,9 +60,6 @@ ALTER TABLE IF EXISTS ONLY public."user" DROP CONSTRAINT IF EXISTS user_pkey;
 ALTER TABLE IF EXISTS ONLY public."user" DROP CONSTRAINT IF EXISTS user_identifier_key;
 ALTER TABLE IF EXISTS ONLY public."user" DROP CONSTRAINT IF EXISTS user_email_key;
 ALTER TABLE IF EXISTS ONLY public.tenants DROP CONSTRAINT IF EXISTS tenants_pkey;
-ALTER TABLE IF EXISTS ONLY public.specialty DROP CONSTRAINT IF EXISTS specialty_pkey;
-ALTER TABLE IF EXISTS ONLY public.specialty DROP CONSTRAINT IF EXISTS specialty_name_key;
-ALTER TABLE IF EXISTS ONLY public.specialty DROP CONSTRAINT IF EXISTS specialty_key_key;
 ALTER TABLE IF EXISTS ONLY public.role DROP CONSTRAINT IF EXISTS role_pkey;
 ALTER TABLE IF EXISTS ONLY public.role DROP CONSTRAINT IF EXISTS role_name_key;
 ALTER TABLE IF EXISTS ONLY public.role DROP CONSTRAINT IF EXISTS role_key_key;
@@ -1326,14 +1323,6 @@ GRANT ALL ON TABLE public.role TO anon;
 GRANT ALL ON TABLE public.role TO authenticated;
 GRANT ALL ON TABLE public.role TO service_role;
 
-
---
--- Name: TABLE specialty; Type: ACL; Schema: public; Owner: postgres
---
-
-GRANT ALL ON TABLE public.specialty TO anon;
-GRANT ALL ON TABLE public.specialty TO authenticated;
-GRANT ALL ON TABLE public.specialty TO service_role;
 
 
 --
